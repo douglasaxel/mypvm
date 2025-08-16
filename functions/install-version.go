@@ -11,7 +11,7 @@ import (
 	"runtime"
 )
 
-// ProgressReader é um wrapper para io.Reader que mostra o progresso do download
+// ProgressReader is a wrapper for io.Reader that shows download progress
 type ProgressReader struct {
 	r              io.Reader
 	totalSize      int64
@@ -19,26 +19,26 @@ type ProgressReader struct {
 	lastPercent    int
 }
 
-// Read implementa a interface io.Reader e atualiza o progresso
+// Read implements the io.Reader interface and updates progress
 func (pr *ProgressReader) Read(p []byte) (n int, err error) {
 	n, err = pr.r.Read(p)
 	pr.downloadedSize += int64(n)
 
-	// Calcular e mostrar o progresso
+	// Calculate and show progress
 	var percent int
 	if pr.totalSize > 0 {
 		percent = int((float64(pr.downloadedSize) / float64(pr.totalSize)) * 100)
 	} else {
-		// Se não temos o tamanho total, mostrar bytes baixados
-		fmt.Printf("\rBaixando... %d bytes", pr.downloadedSize)
+		// If we don't have the total size, show downloaded bytes
+		fmt.Printf("\rDownloading... %d bytes", pr.downloadedSize)
 		return
 	}
 
-	// Atualizar a barra de progresso apenas quando a porcentagem mudar
+	// Update the progress bar only when the percentage changes
 	if percent != pr.lastPercent {
 		pr.lastPercent = percent
 
-		// Criar uma barra de progresso visual
+		// Create a visual progress bar
 		width := 50
 		bar := make([]byte, width)
 		for i := 0; i < width; i++ {
@@ -49,7 +49,7 @@ func (pr *ProgressReader) Read(p []byte) (n int, err error) {
 			}
 		}
 
-		// Mostrar progresso em MB
+		// Show progress in MB
 		downloadedMB := float64(pr.downloadedSize) / 1024 / 1024
 		totalMB := float64(pr.totalSize) / 1024 / 1024
 		fmt.Printf("\r[%s] %d%% (%.2f MB / %.2f MB)", string(bar), percent, downloadedMB, totalMB)
@@ -61,16 +61,16 @@ func (pr *ProgressReader) Read(p []byte) (n int, err error) {
 func InstallVersion(version string) error {
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
-		fmt.Println("Erro ao obter diretório do usuário.")
+		fmt.Println("Error getting user directory.")
 		panic(err)
 	}
 	mypvmFolder := filepath.Join(userHomeDir, ".mypvm")
 
-	fmt.Printf("Iniciando a instalação da versão %s...\n", version)
+	fmt.Printf("Starting installation of version %s...\n", version)
 
 	versionFolder := filepath.Join(mypvmFolder, version)
 	if _, err := os.Stat(versionFolder); !os.IsNotExist(err) {
-		fmt.Printf("A versão %s já está instalada.\n", version)
+		fmt.Printf("Version %s is already installed.\n", version)
 		return nil
 	}
 
@@ -101,45 +101,45 @@ func InstallVersion(version string) error {
 		urlDownload = fmt.Sprintf("https://www.php.net/distributions/php-%s.tar.gz", version)
 		fileType = ".tar.gz"
 	default:
-		return fmt.Errorf("sistema operacional não suportado: %s", runtime.GOOS)
+		return fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
 	}
 
-	fmt.Printf("Baixando de: %s\n", urlDownload)
+	fmt.Printf("Downloading from: %s\n", urlDownload)
 
 	// Iniciar o request HTTP
 	req, err := http.NewRequest("GET", urlDownload, nil)
 	if err != nil {
-		return fmt.Errorf("erro ao criar requisição: %v", err)
+		return fmt.Errorf("error creating request: %v", err)
 	}
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("erro ao baixar o arquivo: %v", err)
+		return fmt.Errorf("error downloading file: %v", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("erro ao baixar. O servidor retornou: %s", resp.Status)
+		return fmt.Errorf("download error. Server returned: %s", resp.Status)
 	}
 
-	// Obter o tamanho total do arquivo
+	// Get the total file size
 	totalSize := resp.ContentLength
 
-	// Criar o arquivo temporário
+	// Create the temporary file
 	tempFile := version + fileType
 	outFile, err := os.Create(tempFile)
 	if err != nil {
-		return fmt.Errorf("erro ao criar arquivo temporário: %v", err)
+		return fmt.Errorf("error creating temporary file: %v", err)
 	}
 
 	defer func() {
 		if rErr := os.Remove(tempFile); rErr != nil {
-			log.Printf("Aviso: Não foi possível remover o arquivo temporário %s: %v", tempFile, rErr)
+			log.Printf("Warning: Could not remove temporary file %s: %v", tempFile, rErr)
 		}
 	}()
 
-	// Criar um leitor com progresso
+	// Create a reader with progress
 	progressReader := &ProgressReader{
 		r:              resp.Body,
 		totalSize:      totalSize,
@@ -147,23 +147,23 @@ func InstallVersion(version string) error {
 		lastPercent:    -1,
 	}
 
-	// Copiar do leitor com progresso para o arquivo
+	// Copy from the progress reader to the file
 	_, err = io.Copy(outFile, progressReader)
 	if err != nil {
 		outFile.Close()
-		return fmt.Errorf("erro ao salvar o arquivo baixado: %v", err)
+		return fmt.Errorf("error saving downloaded file: %v", err)
 	}
 	outFile.Close()
 
-	// Garantir que a linha de progresso termine com uma nova linha
+	// Ensure that the progress line ends with a new line
 	fmt.Println()
 
-	fmt.Println("Download concluído. Descompactando...")
+	fmt.Println("Download completed. Extracting...")
 
 	if err := utils.Decompress(tempFile, versionFolder); err != nil {
-		return fmt.Errorf("erro ao descompactar: %v", err)
+		return fmt.Errorf("error extracting: %v", err)
 	}
 
-	fmt.Printf("Instalação da versão %s concluída em '%s'.\n", version, versionFolder)
+	fmt.Printf("Installation of version %s completed in '%s'.\n", version, versionFolder)
 	return nil
 }

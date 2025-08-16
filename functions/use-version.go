@@ -10,48 +10,48 @@ import (
 func UseVersion(version string) error {
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
-		fmt.Println("Erro ao obter diretório do usuário.")
+		fmt.Println("Error getting user directory.")
 		panic(err)
 	}
 	mypvmFolder := filepath.Join(userHomeDir, ".mypvm")
 
-	fmt.Printf("Definindo a versão %s como padrão...\n", version)
+	fmt.Printf("Setting version %s as default...\n", version)
 
-	// 1. Verificar se a versão está instalada localmente.
+	// 1. Check if the version is installed locally.
 	versionFolder := filepath.Join(mypvmFolder, version)
 	if _, err := os.Stat(versionFolder); os.IsNotExist(err) {
-		return fmt.Errorf("a versão %s não está instalada. Use o comando 'install' primeiro", version)
+		return fmt.Errorf("version %s is not installed. Use the 'install' command first", version)
 	}
 
-	// 2. Tentar remover o link simbólico existente, se houver.
+	// 2. Try to remove the existing symbolic link, if any.
 	if _, err := os.Lstat(versionFolder); err == nil {
-		fmt.Println("Removendo link simbólico anterior...")
+		fmt.Println("Removing previous symbolic link...")
 		if err := os.Remove(versionFolder); err != nil {
-			return fmt.Errorf("erro ao remover o link simbólico existente: %v", err)
+			return fmt.Errorf("error removing existing symbolic link: %v", err)
 		}
 	} else if !os.IsNotExist(err) {
-		return fmt.Errorf("erro ao verificar link simbólico existente: %v", err)
+		return fmt.Errorf("error checking existing symbolic link: %v", err)
 	}
 
-	// 3. Criar o novo link simbólico.
+	// 3. Create the new symbolic link.
 	err = os.Symlink(versionFolder, mypvmFolder)
 	if err != nil {
-		return fmt.Errorf("erro ao criar o link simbólico para a versão %s: %v", version, err)
+		return fmt.Errorf("error creating symbolic link for version %s: %v", version, err)
 	}
 
-	fmt.Printf("Link simbólico criado com sucesso. A versão %s agora é a padrão.\n", version)
-	fmt.Println("\nPara usar esta versão no seu terminal, adicione o seguinte caminho ao seu PATH:")
+	fmt.Printf("Symbolic link created successfully. Version %s is now the default.\n", version)
+	fmt.Println("\nTo use this version in your terminal, add the following path to your PATH:")
 
 	switch runtime.GOOS {
 	case "windows":
 		fmt.Printf("  %s\n", mypvmFolder)
-		fmt.Println("\nVocê pode fazer isso temporariamente com: 'set PATH=%PATH%;%s'", mypvmFolder)
-		fmt.Println("\nOu permanentemente, adicionando a pasta nas 'Variáveis de Ambiente' do Windows.")
+		fmt.Printf("\nYou can do this temporarily with: 'set PATH=%%PATH%%;%s'", mypvmFolder)
+		fmt.Println("\nOr permanently by adding the folder to Windows 'Environment Variables'.")
 	case "linux", "darwin":
 		fmt.Printf("  %s\n", mypvmFolder)
-		fmt.Println("\nAdicione a linha abaixo no seu arquivo de perfil de shell (ex: ~/.bashrc ou ~/.zshrc):")
+		fmt.Println("\nAdd the line below to your shell profile file (e.g., ~/.bashrc or ~/.zshrc):")
 		fmt.Println(`  export PATH="` + mypvmFolder + `:$PATH"`)
-		fmt.Println("Em seguida, execute 'source ~/.bashrc' (ou o arquivo correspondente) ou reinicie o terminal.")
+		fmt.Println("Then run 'source ~/.bashrc' (or the corresponding file) or restart your terminal.")
 	}
 
 	return nil

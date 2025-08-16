@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 )
 
-// descompactar chama a função de descompressão correta.
+// Decompress calls the correct decompression function.
 func Decompress(src, dest string) error {
 	switch filepath.Ext(src) {
 	case ".zip":
@@ -18,11 +18,11 @@ func Decompress(src, dest string) error {
 	case ".gz":
 		return decompressTarGz(src, dest)
 	default:
-		return fmt.Errorf("tipo de arquivo desconhecido: %s", filepath.Ext(src))
+		return fmt.Errorf("unknown file type: %s", filepath.Ext(src))
 	}
 }
 
-// descompactarZip extrai os arquivos de um .zip para um destino.
+// decompressZip extracts files from a .zip to a destination.
 func decompressZip(src, dest string) error {
 	reader, err := zip.OpenReader(src)
 	if err != nil {
@@ -36,13 +36,13 @@ func decompressZip(src, dest string) error {
 	}
 
 	for _, f := range reader.File {
-		caminho := filepath.Join(dest, f.Name)
+		path := filepath.Join(dest, f.Name)
 		if f.FileInfo().IsDir() {
-			os.MkdirAll(caminho, f.Mode())
+			os.MkdirAll(path, f.Mode())
 			continue
 		}
 
-		outFile, err := os.OpenFile(caminho, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		outFile, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 		if err != nil {
 			return err
 		}
@@ -62,7 +62,7 @@ func decompressZip(src, dest string) error {
 	return nil
 }
 
-// descompactarTarGz extrai os arquivos de um .tar.gz para um destino.
+// decompressTarGz extracts files from a .tar.gz to a destination.
 func decompressTarGz(src, dest string) error {
 	file, err := os.Open(src)
 	if err != nil {
@@ -91,15 +91,15 @@ func decompressTarGz(src, dest string) error {
 			return err
 		}
 
-		caminho := filepath.Join(dest, header.Name)
+		path := filepath.Join(dest, header.Name)
 
 		switch header.Typeflag {
 		case tar.TypeDir:
-			if err := os.MkdirAll(caminho, os.FileMode(header.Mode)); err != nil {
+			if err := os.MkdirAll(path, os.FileMode(header.Mode)); err != nil {
 				return err
 			}
 		case tar.TypeReg:
-			outFile, err := os.OpenFile(caminho, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.FileMode(header.Mode))
+			outFile, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.FileMode(header.Mode))
 			if err != nil {
 				return err
 			}

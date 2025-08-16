@@ -17,27 +17,27 @@ type Release struct {
 
 // List all major versions of PHP available online, then all minor versions
 func ListOnlineVersions() {
-	fmt.Println("Buscando versões de PHP disponíveis online...")
+	fmt.Println("Searching for PHP versions available online...")
 
 	majorVersionsUrl := "https://www.php.net/releases/index.php?json"
 	res, err := http.Get(majorVersionsUrl)
 
 	if err != nil {
-		log.Fatalf("Erro ao buscar versões principais do PHP disponíveis online: %v", err)
+		log.Fatalf("Error fetching main PHP versions available online: %v", err)
 		panic(err)
 	}
 
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		log.Fatalf("Erro ao buscar versões principais do PHP disponíveis online: %v", res.Status)
+		log.Fatalf("Error fetching main PHP versions available online: %v", res.Status)
 		panic(res.Status)
 	}
 
 	var majorReleases map[string]Release
 
 	if err := json.NewDecoder(res.Body).Decode(&majorReleases); err != nil {
-		log.Fatalf("Erro ao decodificar JSON das versões principais: %v", err)
+		log.Fatalf("Error decoding JSON of main versions: %v", err)
 		panic(err)
 	}
 
@@ -53,18 +53,18 @@ func ListOnlineVersions() {
 
 		resDetail, err := http.Get(detailUrl)
 		if err != nil {
-			log.Fatalf("Aviso: Erro ao buscar a versão %s: %v", version, err)
+			log.Fatalf("Warning: Error fetching version %s: %v", version, err)
 		}
 
 		defer resDetail.Body.Close()
 
 		if resDetail.StatusCode != http.StatusOK {
-			log.Fatalf("Aviso: Falha na requisição para a versão %s. Status %s", version, resDetail.Status)
+			log.Fatalf("Warning: Request failed for version %s. Status %s", version, resDetail.Status)
 		}
 
 		var releasesDetail map[string]Release
 		if err := json.NewDecoder(resDetail.Body).Decode(&releasesDetail); err != nil {
-			log.Fatalf("Aviso: Erro ao decodificar JSON da versão %s: %v", version, err)
+			log.Fatalf("Warning: Error decoding JSON for version %s: %v", version, err)
 		}
 
 		maps.Copy(allVersions, releasesDetail)
@@ -83,8 +83,8 @@ func ListOnlineVersions() {
 		return versionAFloat > versionBFloat
 	})
 
-	fmt.Println("\nVersões do PHP disponíveis online:")
+	fmt.Println("\nPHP versions available online:")
 	for _, release := range sorted {
-		fmt.Printf("- Versão %s (Lançamento: %s)\n", release.Version, release.Date)
+		fmt.Printf("- Version %s (Release date: %s)\n", release.Version, release.Date)
 	}
 }

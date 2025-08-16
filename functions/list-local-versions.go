@@ -9,21 +9,21 @@ import (
 func ListLocalVersions() {
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
-		fmt.Println("Erro ao obter diretório do usuário.")
+		fmt.Println("Error getting user directory.")
 		panic(err)
 	}
 	mypvmFolder := filepath.Join(userHomeDir, ".mypvm")
 
-	fmt.Println("Listando versões de PHP instaladas localmente...")
+	fmt.Println("Listing PHP versions installed locally...")
 
 	if _, err := os.Stat(mypvmFolder); os.IsNotExist(err) {
-		fmt.Println("Nenhuma versão instalada localmente.")
+		fmt.Println("No versions installed locally.")
 		return
 	}
 
 	directories, err := os.ReadDir(mypvmFolder)
 	if err != nil {
-		fmt.Println("Erro ao listar versões instaladas localmente.")
+		fmt.Println("Error listing locally installed versions.")
 		return
 	}
 
@@ -31,11 +31,11 @@ func ListLocalVersions() {
 	for _, dir := range directories {
 		if dir.IsDir() {
 			isFoundVersion = true
-			fmt.Printf(" - Versão instalada: %s\n", dir.Name())
+			fmt.Printf(" - Installed version: %s\n", dir.Name())
 		}
 	}
 
 	if !isFoundVersion {
-		fmt.Println("Nenhuma versão instalada localmente.")
+		fmt.Println("No versions installed locally.")
 	}
 }

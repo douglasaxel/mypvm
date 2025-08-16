@@ -9,14 +9,14 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("Bem-vindo ao Gerenciador de versões do PHP!")
-		fmt.Println("Uso: mypvm [comando] [argumentos]")
-		fmt.Println("\n\nComandos disponíveis:")
-		fmt.Println("\nlist   - Lista as versões de PHP disponíveis online")
-		fmt.Println("list-local   - Lista as versões de PHP instaladas localmente")
-		fmt.Println("install - Instala uma versão específica do PHP")
-		fmt.Println("remove - Remove uma versão específica do PHP")
-		fmt.Println("use    - Seleciona uma versão específica do PHP")
+		fmt.Println("Welcome to PHP Version Manager!")
+		fmt.Println("Usage: mypvm [command] [arguments]")
+		fmt.Println("\n\nAvailable commands:")
+		fmt.Println("\nlist   - Lists PHP versions available online")
+		fmt.Println("list-local   - Lists PHP versions installed locally")
+		fmt.Println("install - Installs a specific PHP version")
+		fmt.Println("remove - Removes a specific PHP version")
+		fmt.Println("use    - Selects a specific PHP version")
 
 		return
 	}
@@ -30,26 +30,26 @@ func main() {
 		functions.ListLocalVersions()
 	case "install":
 		if len(os.Args) < 3 {
-			fmt.Println("Por favor, informe a versão do PHP a ser instalada. Ex: 'gerenciador-php instalar 8.3.0'")
+			fmt.Println("Please specify the PHP version to install. Example: 'mypvm install 8.3.0'")
 			os.Exit(1)
 		}
 		version := os.Args[2]
 		if err := functions.InstallVersion(version); err != nil {
-			log.Fatalf("Erro na instalação: %v", err)
+			log.Fatalf("Installation error: %v", err)
 		}
 	case "remove":
-		fmt.Println("Removendo uma versão específica do PHP...")
+		fmt.Println("Removing a specific PHP version...")
 	case "use":
 		if len(os.Args) < 3 {
-			fmt.Println("Por favor, informe a versão do PHP a ser usada. Ex: 'gerenciador-php use 8.3.0'")
+			fmt.Println("Please specify the PHP version to use. Example: 'mypvm use 8.3.0'")
 			os.Exit(1)
 		}
 		version := os.Args[2]
 		if err := functions.UseVersion(version); err != nil {
-			log.Fatalf("Erro na seleção: %v", err)
+			log.Fatalf("Selection error: %v", err)
 		}
 	default:
-		fmt.Println("Comando inválido!")
+		fmt.Println("Invalid command!")
 		os.Exit(1)
 	}
 }
