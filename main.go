@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"mypvm/functions"
 	"os"
 )
@@ -25,14 +26,28 @@ func main() {
 	switch command {
 	case "list":
 		functions.ListOnlineVersions()
-	case "list-local":
-		fmt.Println("Listando versões de PHP instaladas localmente...")
+	case "local":
+		functions.ListLocalVersions()
 	case "install":
-		fmt.Println("Instalando uma versão específica do PHP...")
+		if len(os.Args) < 3 {
+			fmt.Println("Por favor, informe a versão do PHP a ser instalada. Ex: 'gerenciador-php instalar 8.3.0'")
+			os.Exit(1)
+		}
+		version := os.Args[2]
+		if err := functions.InstallVersion(version); err != nil {
+			log.Fatalf("Erro na instalação: %v", err)
+		}
 	case "remove":
 		fmt.Println("Removendo uma versão específica do PHP...")
 	case "use":
-		fmt.Println("Selecionando uma versão específica do PHP...")
+		if len(os.Args) < 3 {
+			fmt.Println("Por favor, informe a versão do PHP a ser usada. Ex: 'gerenciador-php use 8.3.0'")
+			os.Exit(1)
+		}
+		version := os.Args[2]
+		if err := functions.UseVersion(version); err != nil {
+			log.Fatalf("Erro na seleção: %v", err)
+		}
 	default:
 		fmt.Println("Comando inválido!")
 		os.Exit(1)

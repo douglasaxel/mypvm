@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"log"
 	"maps"
+	"mypvm/utils"
 	"net/http"
 	"sort"
-	"strconv"
-	"strings"
 )
 
 type Release struct {
@@ -78,8 +77,8 @@ func ListOnlineVersions() {
 	}
 
 	sort.Slice(sorted, func(i, j int) bool {
-		versionAFloat, _ := strconv.ParseFloat(strings.Replace(sorted[i].Version, ".", "", 1), 64)
-		versionBFloat, _ := strconv.ParseFloat(strings.Replace(sorted[j].Version, ".", "", 1), 64)
+		versionAFloat := utils.VersionToFloat(sorted[i].Version)
+		versionBFloat := utils.VersionToFloat(sorted[j].Version)
 
 		return versionAFloat > versionBFloat
 	})
